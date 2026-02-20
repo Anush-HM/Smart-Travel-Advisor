@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Travel Safety & Comfort Advisor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#0f766e',
+            secondary: '#0ea5e9'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+
+<!-- ================= HERO ================= -->
+<section class="min-h-screen flex flex-col justify-center items-center text-center px-6">
+  <h1 class="text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-sky-400">
+    Smart Travel Safety & Comfort Advisor
+  </h1>
+  <p class="mt-6 text-gray-300 max-w-2xl">
+    A chatbot-powered travel assistant providing weather insights, safety guidance,
+    packing suggestions, and emergency remedies — all in one place.
+  </p>
+
+  <div class="mt-10 w-full max-w-xl flex gap-3">
+    <input id="destination"
+      placeholder="Enter your destination..."
+      class="flex-1 p-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md focus:outline-none">
+    <button onclick="goToResults()"
+  class="px-6 rounded-xl bg-gradient-to-r from-teal-500 to-sky-500">
+  Explore
+</button>
+
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section class="max-w-7xl mx-auto px-6 pb-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+  <div class="glass-card">
+    🌦️
+    <h3 class="title">Weather Intelligence</h3>
+    <p>Live-like climate insights and precautionary advice.</p>
+  </div>
+
+  <div class="glass-card">
+    🛡️
+    <h3 class="title">Safety Advisory</h3>
+    <p>Location-specific safety guidance and best practices.</p>
+  </div>
+
+  <div class="glass-card">
+    🎒
+    <h3 class="title">Smart Packing</h3>
+    <p>Personalized packing recommendations.</p>
+  </div>
+
+   
+  <div class="glass-card">
+    🚑
+    <h3 class="title">Emergency Tips</h3>
+    <p>Heat, cold, altitude sickness remedies and emergency guidance.</p>
+  </div>
+</section>
+
+<!-- ================= OUTPUT PANEL ================= -->
+<section class="max-w-4xl mx-auto px-6">
+  <div id="output"
+    class="hidden glass-card text-left">
+  </div>
+</section>
+
+<!-- ================= CHATBOT BUTTON ================= -->
+<button onclick="toggleChat()"
+  class="fixed bottom-6 right-6 bg-gradient-to-r from-teal-500 to-sky-500 p-4 rounded-full shadow-2xl hover:scale-110 transition">
+  💬
+</button>
+
+<!-- ================= CHATBOT ================= -->
+<div id="chatbot"
+  class="hidden fixed bottom-24 right-6 w-80 glass-card">
+
+  <div class="font-semibold text-center mb-3">Travel Assistant</div>
+
+  <div id="chatBox" class="h-48 overflow-y-auto text-sm mb-3 space-y-2"></div>
+
+  <div class="flex gap-2">
+    <input id="chatInput"
+      class="flex-1 p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
+      placeholder="Ask anything...">
+    <button onclick="sendMessage()"
+      class="px-3 rounded bg-teal-500">➤</button>
+  </div>
+</div>
+
+<!-- ================= STYLES ================= -->
+<style>
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 1.5rem;
+    border-radius: 1.25rem;
+    transition: transform 0.3s ease;
+  }
+  .glass-card:hover {
+    transform: translateY(-6px);
+  }
+  .title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+</style>
+
+<script src="js/app.js"></script>
+</body>
+</html>

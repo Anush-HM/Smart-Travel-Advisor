@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TripMate – Travel Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+
+<section class="min-h-screen flex flex-col justify-center items-center px-6">
+
+  <h1 class="text-4xl font-bold mb-6 text-teal-400">TripMate</h1>
+
+  <div class="glass-card w-full max-w-xl flex flex-col">
+
+    <div
+      id="chatBox"
+      class="h-80 overflow-y-auto space-y-3 mb-4 text-sm flex flex-col">
+    </div>
+
+    <!-- Search bar -->
+    <div class="flex items-center w-full gap-3">
+
+      <!-- Camera (FIXED) -->
+      <button
+        onclick="document.getElementById('imageInput').click()"
+        class="w-12 h-12 flex items-center justify-center bg-white/10 rounded-lg cursor-pointer text-xl hover:bg-white/20">
+        📷
+      </button>
+
+      <!-- Hidden Image Input (ADDED ID + onchange) -->
+      <input
+        type="file"
+        id="imageInput"
+        accept="image/*"
+        class="hidden"
+        onchange="sendImage()"
+      />
+
+      <!-- Text Input -->
+      <input
+        id="chatInput"
+        type="text"
+        class="flex-1 h-12 bg-white/10 rounded-lg px-4 outline-none text-white"
+        placeholder="Where are you headed? Ask me anything 🌍"
+      >
+
+      <!-- Send -->
+      <button
+        onclick="sendMessage()"
+        class="w-12 h-12 bg-teal-500 rounded-lg flex items-center justify-center hover:bg-teal-600">
+        ➤
+      </button>
+
+    </div>
+  </div>
+
+  <a href="result.html" class="mt-6 text-gray-400 hover:text-white">
+    ← Back to Results
+  </a>
+
+</section>
+
+<style>
+.glass-card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+}
+</style>
+
+<script src="js/chatbot.js"></script>
+</body>
+</html>
