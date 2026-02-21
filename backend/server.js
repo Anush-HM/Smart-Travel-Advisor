@@ -12,6 +12,8 @@ app.use(express.json());
 const weatherRoutes = require("./routes/weather");
 app.use("/api/weather", weatherRoutes);
 
+const aiRoutes = require("./routes/ai");
+app.use("/api/ai", aiRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
