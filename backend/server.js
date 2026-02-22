@@ -15,6 +15,9 @@ app.use("/api/weather", weatherRoutes);
 const aiRoutes = require("./routes/ai");
 app.use("/api/ai", aiRoutes);
 
+const chatRoutes = require("./routes/chat");
+app.use("/api/chat", chatRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

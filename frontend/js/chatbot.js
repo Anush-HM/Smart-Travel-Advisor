@@ -1,25 +1,27 @@
+// Get city from URL
+const city = new URLSearchParams(window.location.search).get("place")?.split(":")[0].trim() || "your destination";
+
 // Main send function
-function sendMessage() {
+async function sendMessage() {
   const chatInput = document.getElementById("chatInput");
   const message = chatInput.value.trim();
-
   if (message === "") return;
 
-  console.log("Sending:", message);
-
-  // Show user message
   addUserMessage(message);
-
-  // Clear input
   chatInput.value = "";
 
-  // Bot reply after delay
-  setTimeout(() => {
-    botReply(message);
-  }, 700);
+  try {
+    const response = await fetch("http://127.0.0.1:5000/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, city })
+    });
+    const data = await response.json();
+    addBotMessage(data.reply);
+  } catch (error) {
+    addBotMessage("Sorry, I couldn't connect to the server.");
+  }
 }
-
-// ================= IMAGE UPLOAD PART (ADDED) =================
 
 // Handle image upload
 function sendImage() {
@@ -28,90 +30,53 @@ function sendImage() {
   if (!file) return;
 
   const reader = new FileReader();
-
-  reader.onload = function (e) {
+  reader.onload = function(e) {
     const chatBox = document.getElementById("chatBox");
-
-    // Show uploaded image as user message
     const img = document.createElement("img");
     img.src = e.target.result;
-    img.className =
-      "self-end rounded-xl max-w-[200px] border border-white/20 mb-2";
+    img.className = "self-end rounded-xl max-w-[200px] border border-white/20 mb-2";
     chatBox.appendChild(img);
-
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Default bot reply for image
     setTimeout(() => {
-      addBotMessage(
-        "🌍 I’ve got this destination—here are the key travel insights to help you plan confidently."
-      );
+      addBotMessage("🌍 I've received your image! Image analysis coming soon.");
     }, 600);
   };
-
   reader.readAsDataURL(file);
   input.value = "";
 }
 
-// ================= END IMAGE UPLOAD PART =================
-
-// Add user message to chat
+// Add user message
 function addUserMessage(text) {
   const chatBox = document.getElementById("chatBox");
   const msgDiv = document.createElement("div");
-  msgDiv.className =
-    "self-end bg-teal-500/90 text-white px-4 py-2 rounded-xl max-w-[75%]";
+  msgDiv.className = "self-end bg-teal-500/90 text-white px-4 py-2 rounded-xl max-w-[75%]";
   msgDiv.innerText = text;
   chatBox.appendChild(msgDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Add bot message to chat
+// Add bot message
 function addBotMessage(text) {
   const chatBox = document.getElementById("chatBox");
   const msgDiv = document.createElement("div");
-  msgDiv.className =
-    "self-start bg-white/20 text-white px-4 py-2 rounded-xl max-w-[75%]";
+  msgDiv.className = "self-start bg-white/20 text-white px-4 py-2 rounded-xl max-w-[75%]";
   msgDiv.innerText = text;
   chatBox.appendChild(msgDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Simple bot logic
-function botReply(userMsg) {
-  let reply = "That sounds interesting! Tell me more ✨";
-  const msg = userMsg.toLowerCase();
+// Initialize
+window.addEventListener("load", function() {
+  addBotMessage(`👋 Hey! I'm TripMate. Ready to explore ${city}? 🌍`);
 
-  if (msg.includes("weather")) {
-    reply =
-      "🌤️ I’ve got weather insights ready for your trip. Let me know what you’d like to see.";
-  } else if (msg.includes("packing")) {
-    reply = "🎒 I’ve got packing tips ready to help you travel prepared.";
-  } else if (msg.includes("safety")) {
-    reply = "🛡️ Safety first! I’ll guide you through important safety tips.";
-  } else if (msg.includes("hello") || msg.includes("hi")) {
-    reply =
-      "Hey there! 😊 I’ve got your destination—let’s get you travel-ready.";
-  }
+ document.getElementById("backLink").onclick = function(e) {
+  e.preventDefault();
+  window.location.replace(`results.html?place=${city}`);
+};
 
-  addBotMessage(reply);
-}
-
-// Initialize when page loads
-window.addEventListener("load", function () {
-  console.log("Chatbot initialized!");
-
-  // Show welcome message
-  addBotMessage(
-    `👋 Hey! I'm TripMate. Ready to explore ${
-      new URLSearchParams(window.location.search).get("place") ||
-      "your destination"
-    }? 🌍`
-  );
-
-  // Add Enter key listener
   const chatInput = document.getElementById("chatInput");
-  chatInput.addEventListener("keydown", function (e) {
+  chatInput.addEventListener("keydown", function(e) {
     if (e.key === "Enter") {
       e.preventDefault();
       sendMessage();
