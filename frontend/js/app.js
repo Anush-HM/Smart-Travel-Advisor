@@ -56,3 +56,17 @@ function sendMessage() {
   input.value = "";
   chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+// ================== ENTER KEY LISTENER ==================
+document.addEventListener("DOMContentLoaded", function () {
+  const destinationInput = document.getElementById("destination");
+
+  if (destinationInput) {
+    destinationInput.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault(); // Prevent default behaviour
+        goToResults();
+      }
+    });
+  }
+});
