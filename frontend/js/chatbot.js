@@ -23,29 +23,90 @@ async function sendMessage() {
   }
 }
 
+
 // Handle image upload
-function sendImage() {
+async function sendImage() {
   const input = document.getElementById("imageInput");
   const file = input.files[0];
   if (!file) return;
 
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    addBotMessage("❌ Image too large! Please select an image under 5MB.");
+    return;
+  }
+
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    addBotMessage("❌ Please select a valid image file.");
+    return;
+  }
+
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
+    const imageUrl = e.target.result;
+    const base64Image = imageUrl.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+    
+    // Display image in chat
     const chatBox = document.getElementById("chatBox");
     const img = document.createElement("img");
-    img.src = e.target.result;
+    img.src = imageUrl;
     img.className = "self-end rounded-xl max-w-[200px] border border-white/20 mb-2";
     chatBox.appendChild(img);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    setTimeout(() => {
-      addBotMessage("🌍 I've received your image! Image analysis coming soon.");
-    }, 600);
+    // Show analyzing message
+    addBotMessage("🔍 Analyzing your image...");
+
+    try {
+      // Send to backend for analysis
+      const response = await fetch('http://localhost:5000/api/image/analyze', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ 
+          image: base64Image
+        })
+      });
+      
+      const data = await response.json();
+      
+      // Remove analyzing message
+      const messages = chatBox.querySelectorAll('.self-start');
+      const lastBotMessage = messages[messages.length - 1];
+      if (lastBotMessage && lastBotMessage.textContent.includes("Analyzing")) {
+        lastBotMessage.remove();
+      }
+      
+      // Show AI response
+      if (data.error) {
+        addBotMessage("❌ Sorry, I couldn't analyze the image. Error: " + data.error);
+      } else {
+        addBotMessage(data.result);
+      }
+      
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      
+      // Remove analyzing message
+      const messages = chatBox.querySelectorAll('.self-start');
+      const lastBotMessage = messages[messages.length - 1];
+      if (lastBotMessage && lastBotMessage.textContent.includes("Analyzing")) {
+        lastBotMessage.remove();
+      }
+      
+      addBotMessage("❌ Sorry, couldn't analyze the image. Make sure the backend server is running!");
+    }
   };
+  
+  reader.onerror = function() {
+    addBotMessage("❌ Failed to read the image file. Please try again.");
+  };
+  
   reader.readAsDataURL(file);
   input.value = "";
 }
-
 // Add user message
 function addUserMessage(text) {
   const chatBox = document.getElementById("chatBox");
