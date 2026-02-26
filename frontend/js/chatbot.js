@@ -66,7 +66,8 @@ async function sendImage() {
           'Content-Type': 'application/json' 
         },
         body: JSON.stringify({ 
-          image: base64Image
+          image: base64Image,
+          city: city
         })
       });
       
