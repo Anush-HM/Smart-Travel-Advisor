@@ -27,8 +27,8 @@
 
 <!-- ================= HERO ================= -->
 <section class="min-h-screen flex flex-col justify-center items-center text-center px-6">
-  <h1 class="text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-sky-400">
-    Smart Travel Safety & Comfort Advisor
+  <h1 class="text-6xl md:text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-sky-400">
+    TripMate
   </h1>
   <p class="mt-6 text-gray-300 max-w-2xl">
     A chatbot-powered travel assistant providing weather insights, safety guidance,
@@ -36,9 +36,9 @@
   </p>
 
   <div class="mt-10 w-full max-w-xl flex gap-3">
-    <input id="destination"
-      placeholder="Enter your destination..."
-      class="flex-1 p-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md focus:outline-none">
+   <input id="destination"
+  placeholder="Enter your destination..."
+  class="flex-1 p-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md focus:outline-none">
     <button onclick="goToResults()"
   class="px-6 rounded-xl bg-gradient-to-r from-teal-500 to-sky-500">
   Explore
@@ -82,29 +82,6 @@
     class="hidden glass-card text-left">
   </div>
 </section>
-
-<!-- ================= CHATBOT BUTTON ================= -->
-<button onclick="toggleChat()"
-  class="fixed bottom-6 right-6 bg-gradient-to-r from-teal-500 to-sky-500 p-4 rounded-full shadow-2xl hover:scale-110 transition">
-  💬
-</button>
-
-<!-- ================= CHATBOT ================= -->
-<div id="chatbot"
-  class="hidden fixed bottom-24 right-6 w-80 glass-card">
-
-  <div class="font-semibold text-center mb-3">Travel Assistant</div>
-
-  <div id="chatBox" class="h-48 overflow-y-auto text-sm mb-3 space-y-2"></div>
-
-  <div class="flex gap-2">
-    <input id="chatInput"
-      class="flex-1 p-2 rounded bg-white/10 border border-white/20 focus:outline-none"
-      placeholder="Ask anything...">
-    <button onclick="sendMessage()"
-      class="px-3 rounded bg-teal-500">➤</button>
-  </div>
-</div>
 
 <!-- ================= STYLES ================= -->
 <style>
