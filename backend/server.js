@@ -2,9 +2,11 @@ const dotenv = require('dotenv');
 dotenv.config({ path: __dirname + '/.env' });
 const express = require("express");
 const cors = require("cors");
+const connectDB = require('./config/db');
 
 const app = express();
 const PORT = 5000;
+connectDB(); 
 
 app.use(cors());
 app.use(express.json());

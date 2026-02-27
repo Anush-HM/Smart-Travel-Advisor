@@ -1,5 +1,6 @@
 const Groq = require("groq-sdk");
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const ChatHistory = require('../models/chathistory');
 
 const chat = async (req, res) => {
   try {
@@ -22,6 +23,23 @@ const chat = async (req, res) => {
 });
 
     const reply = response.choices[0].message.content;
+
+     // Save chat to database
+    try {
+      await ChatHistory.create({
+        destination: city,
+        sessionId: 'anonymous',
+        messages: [
+          { sender: 'user', content: message },
+          { sender: 'bot', content: reply }
+        ]
+      });
+      console.log('✅ Chat saved to database');
+    } catch (dbError) {
+      console.error('⚠️ Failed to save chat:', dbError.message);
+      // Don't fail the request if DB save fails
+    }
+    
     res.json({ reply });
 
   } catch (error) {
