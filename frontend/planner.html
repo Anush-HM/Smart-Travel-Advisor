@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plan My Trip – TripMate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white min-h-screen">
+
+<!-- HEADER -->
+<section class="py-16 text-center px-6">
+  <h1 id="pageTitle" class="text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-sky-400">
+    Plan My Trip
+  </h1>
+  <p class="mt-4 text-gray-300">Get a complete end-to-end itinerary tailored to your budget</p>
+</section>
+
+<div class="max-w-3xl mx-auto px-6 pb-24">
+
+  <!-- BACK LINK -->
+  <div class="mb-8">
+    <a id="backLink" href="results.html"
+      class="inline-block px-5 py-2 rounded-xl border border-white/20 hover:bg-white/10 transition text-sm cursor-pointer">
+      ← Back to Results
+    </a>
+  </div>
+
+  <!-- STEP 1: FORM -->
+  <div id="stepForm">
+    <div class="glass-card">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+
+        <div>
+          <label class="input-label">✈️ Travelling From</label>
+          <input id="fromCity" class="plan-input" placeholder="e.g. Bengaluru" />
+        </div>
+
+        <div>
+          <label class="input-label">📍 Destination</label>
+          <input id="toCity" class="plan-input" readonly style="opacity:0.5;cursor:not-allowed;" />
+        </div>
+
+        <div>
+          <label class="input-label">📅 Number of Days</label>
+          <input id="tripDays" type="number" min="1" max="30" class="plan-input" placeholder="e.g. 5" />
+        </div>
+
+        <div>
+          <label class="input-label">💰 Total Budget</label>
+          <div class="flex gap-2">
+            <select id="currency" class="plan-input" style="width:90px;flex-shrink:0;">
+              <option value="₹">₹ INR</option>
+              <option value="$">$ USD</option>
+              <option value="€">€ EUR</option>
+              <option value="£">£ GBP</option>
+            </select>
+            <input id="budget" type="number" class="plan-input" placeholder="e.g. 100000" />
+          </div>
+        </div>
+
+      </div>
+
+      <button onclick="generatePlan()"
+        class="w-full py-4 rounded-xl bg-gradient-to-r from-teal-500 to-sky-500 hover:scale-105 transition font-semibold text-white text-base mt-2">
+        ✨ Generate My Trip Plan
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 2: LOADING -->
+  <div id="stepLoader" style="display:none;" class="text-center py-20">
+    <div class="flex gap-2 justify-center mb-4">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </div>
+    <p class="text-gray-300">Planning your perfect trip...</p>
+    <p class="text-gray-500 text-sm mt-1">This may take a few seconds</p>
+  </div>
+
+  <!-- STEP 3: RESULT -->
+  <div id="stepResult" style="display:none;">
+
+    <div class="glass-card mb-6" id="planSummary"></div>
+
+    <div class="mb-6">
+      <p class="section-label">🛫 Getting There</p>
+      <div class="glass-card" id="travelTo"></div>
+    </div>
+
+    <div class="mb-6">
+      <p class="section-label">🏨 Where You'll Stay</p>
+      <div class="glass-card" id="hotelInfo"></div>
+    </div>
+
+    <div class="mb-6">
+      <p class="section-label">📅 Day-by-Day Itinerary</p>
+      <div id="dayCards"></div>
+    </div>
+
+    <div class="mb-6">
+      <p class="section-label">🛬 Return Journey</p>
+      <div class="glass-card" id="returnTravel"></div>
+    </div>
+
+    <div class="mb-6">
+      <p class="section-label">💰 Budget Breakdown</p>
+      <div class="glass-card" id="budgetBreakdown"></div>
+    </div>
+
+    <div class="mb-6">
+      <p class="section-label">🗺️ Your Itinerary on the Map</p>
+      <div id="tripMap" class="rounded-2xl overflow-hidden" style="height:420px;border:1px solid rgba(255,255,255,0.15);"></div>
+      <p class="text-center text-gray-500 text-xs mt-2">📍 Numbered pins show places from your itinerary in order</p>
+    </div>
+
+    <div class="flex flex-wrap gap-4 mt-4">
+      <button onclick="resetPlan()"
+        class="px-6 py-3 rounded-xl border border-white/20 hover:bg-white/10 transition text-sm cursor-pointer">
+        ← Plan Again
+      </button>
+      <a id="chatLinkResult" href="chatbot.html"
+        class="px-6 py-3 rounded-xl bg-gradient-to-r from-teal-500 to-sky-500 hover:scale-105 transition font-semibold text-sm">
+        💬 Ask TripMate →
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 1.75rem;
+    border-radius: 1.5rem;
+    transition: transform 0.3s ease;
+  }
+  .glass-card:hover { transform: translateY(-6px); }
+
+  .plan-input {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: white;
+    width: 100%;
+    outline: none;
+    font-size: 0.95rem;
+  }
+  .plan-input:focus { border-color: rgba(45, 212, 191, 0.6); }
+  .plan-input::placeholder { color: rgba(255,255,255,0.3); }
+  .plan-input option { background: #1e293b; color: white; }
+
+  .input-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+
+  .chip {
+    display: inline-block;
+    background: rgba(45, 212, 191, 0.15);
+    border: 1px solid rgba(45, 212, 191, 0.3);
+    color: #5eead4;
+    border-radius: 999px;
+    padding: 0.2rem 0.75rem;
+    font-size: 0.78rem;
+    margin-right: 0.4rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .day-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
+    transition: transform 0.3s ease;
+  }
+  .day-card:hover { transform: translateY(-6px); }
+
+  .day-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #14b8a6, #38bdf8);
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    letter-spacing: 0.06em;
+    margin-right: 0.5rem;
+  }
+
+  .time-row { display: flex; gap: 0.75rem; margin-bottom: 0.5rem; align-items: flex-start; }
+  .time-tag {
+    font-size: 0.68rem; font-weight: 700; color: #5eead4;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    min-width: 80px; margin-top: 2px; flex-shrink: 0;
+  }
+
+  .budget-bar-bg { background: rgba(255,255,255,0.08); border-radius: 999px; height: 5px; margin-top: 0.3rem; }
+  .budget-bar-fill { background: linear-gradient(90deg, #14b8a6, #38bdf8); border-radius: 999px; height: 5px; }
+
+  .dot {
+    width: 10px; height: 10px; background: #14b8a6; border-radius: 50%;
+    animation: blink 1.2s infinite ease-in-out;
+    display: inline-block;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100%{transform:scale(0.5);opacity:0.3} 40%{transform:scale(1);opacity:1} }
+
+  .leaflet-popup-content-wrapper { background: #1e293b; border: 1px solid rgba(255,255,255,0.15); color: white; border-radius: 0.75rem; }
+  .leaflet-popup-tip { background: #1e293b; }
+  .leaflet-popup-content { font-size: 0.85rem; }
+</style>
+
+<script>
+let tripCity = '';
+let tripMap = null;
+
+window.onload = function() {
+  let city = new URLSearchParams(window.location.search).get("place");
+  if (!city) city = "your destination";
+  city = city.split(":")[0].trim();
+  tripCity = city;
+
+  document.getElementById("pageTitle").innerText = `Plan My Trip to ${city}`;
+  document.getElementById("toCity").value = city;
+  document.getElementById("backLink").href = `results.html?place=${encodeURIComponent(city)}`;
+  document.getElementById("chatLinkResult").href = `chatbot.html?place=${encodeURIComponent(city)}`;
+};
+
+async function generatePlan() {
+  const fromCity = document.getElementById("fromCity").value.trim();
+  const days     = document.getElementById("tripDays").value.trim();
+  const budget   = document.getElementById("budget").value.trim();
+  const currency = document.getElementById("currency").value;
+
+  if (!fromCity || !days || !budget) {
+    alert("Please fill in all fields!");
+    return;
+  }
+
+  document.getElementById("stepForm").style.display   = "none";
+  document.getElementById("stepLoader").style.display = "block";
+  document.getElementById("stepResult").style.display = "none";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/api/trip", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fromCity, toCity: tripCity, days: parseInt(days), budget, currency })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    renderPlan(data.plan);
+  } catch (err) {
+    document.getElementById("stepLoader").style.display = "none";
+    document.getElementById("stepForm").style.display   = "block";
+    alert("Could not generate plan: " + err.message);
+  }
+}
+
+function resetPlan() {
+  document.getElementById("stepForm").style.display   = "block";
+  document.getElementById("stepResult").style.display = "none";
+  document.getElementById("stepLoader").style.display = "none";
+  if (tripMap) { tripMap.remove(); tripMap = null; }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderPlan(plan) {
+  document.getElementById("stepLoader").style.display = "none";
+  document.getElementById("stepResult").style.display = "block";
+
+  document.getElementById("planSummary").innerHTML = `
+    <div class="flex justify-between items-start flex-wrap gap-4">
+      <div style="flex:1;min-width:180px;">
+        <p class="text-xs text-teal-400 uppercase tracking-widest mb-2">Trip Summary</p>
+        <p class="text-gray-300 text-sm leading-relaxed">${plan.summary}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-xs text-gray-400 mb-1">Total Estimated Cost</p>
+        <p class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-sky-400">${plan.totalEstimatedCost}</p>
+      </div>
+    </div>`;
+
+  const t = plan.travelToDestination;
+  document.getElementById("travelTo").innerHTML = `
+    <div class="mb-3">
+      <span class="chip">🚀 ${t.mode}</span>
+      <span class="chip">⏱ ${t.duration}</span>
+      <span class="chip">💰 ${t.estimatedCost}</span>
+    </div>
+    <p class="text-gray-400 text-sm">💡 ${t.tips}</p>`;
+
+  const h = plan.hotel;
+  document.getElementById("hotelInfo").innerHTML = `
+    <div class="flex justify-between items-start flex-wrap gap-3">
+      <div>
+        <p class="font-bold text-white text-base mb-2">${h.name}</p>
+        <span class="chip">${h.type}</span>
+      </div>
+      <div class="text-right">
+        <p class="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-sky-400">${h.pricePerNight}</p>
+        <p class="text-xs text-gray-400 mt-1">${h.totalHotelCost}</p>
+      </div>
+    </div>`;
+
+  const dayContainer = document.getElementById("dayCards");
+  dayContainer.innerHTML = "";
+  plan.days.forEach((day, i) => {
+    const el = document.createElement("div");
+    el.className = "day-card";
+    el.innerHTML = `
+      <div class="flex items-center flex-wrap gap-2 mb-3">
+        <span class="day-badge">DAY ${day.day}</span>
+        <span class="font-semibold text-white">${day.title}</span>
+        <span class="chip" style="margin-left:auto;">~${day.estimatedDayCost}</span>
+      </div>
+      <div class="time-row">
+        <span class="time-tag">🌅 Morning</span>
+        <span class="text-gray-300 text-sm leading-relaxed">${day.morning}</span>
+      </div>
+      <div class="time-row">
+        <span class="time-tag">☀️ Afternoon</span>
+        <span class="text-gray-300 text-sm leading-relaxed">${day.afternoon}</span>
+      </div>
+      <div class="time-row">
+        <span class="time-tag">🌙 Evening</span>
+        <span class="text-gray-300 text-sm leading-relaxed">${day.evening}</span>
+      </div>`;
+    dayContainer.appendChild(el);
+  });
+
+  const r = plan.returnTravel;
+  document.getElementById("returnTravel").innerHTML = `
+    <span class="chip">🏠 ${r.mode} Back</span>
+    <span class="chip">⏱ ${r.duration}</span>
+    <span class="chip">💰 ${r.estimatedCost}</span>`;
+
+  const b = plan.budgetBreakdown;
+  const items = [
+    { label:"✈️ Travel",        value:b.travel,        pct:30 },
+    { label:"🏨 Accommodation", value:b.accommodation, pct:25 },
+    { label:"🍽️ Food",          value:b.food,          pct:20 },
+    { label:"🎭 Attractions",   value:b.attractions,   pct:15 },
+    { label:"🎒 Miscellaneous", value:b.miscellaneous, pct:10 }
+  ];
+  document.getElementById("budgetBreakdown").innerHTML = items.map(item => `
+    <div style="margin-bottom:0.85rem;">
+      <div class="flex justify-between">
+        <span class="text-sm text-gray-300">${item.label}</span>
+        <span class="text-sm font-semibold text-teal-400">${item.value}</span>
+      </div>
+      <div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${item.pct}%;"></div></div>
+    </div>`).join("");
+
+  setTimeout(() => renderMap(plan.allPlaces, tripCity), 400);
+}
+
+async function renderMap(places, city) {
+  if (tripMap) { tripMap.remove(); tripMap = null; }
+
+  tripMap = L.map('tripMap', { zoomControl: true, scrollWheelZoom: false });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CARTO', maxZoom: 18
+  }).addTo(tripMap);
+
+  const colors = ['#14b8a6','#38bdf8','#a78bfa','#fb923c','#f472b6','#4ade80','#facc15'];
+  const bounds = [];
+
+  function makeIcon(color, num) {
+    return L.divIcon({
+      className: '',
+      html: `<div style="background:${color};color:#0f172a;border:2.5px solid white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;box-shadow:0 3px 10px rgba(0,0,0,0.5);">${num}</div>`,
+      iconSize: [30,30], iconAnchor: [15,15]
+    });
+  }
+
+  const geocoded = [];
+  for (let i = 0; i < Math.min(places.length, 10); i++) {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(places[i]+', '+city)}&format=json&limit=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      const results = await res.json();
+      if (results.length > 0)
+        geocoded.push({ name: places[i], lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) });
+    } catch(e) {}
+    await new Promise(r => setTimeout(r, 250));
+  }
+
+  if (geocoded.length === 0) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`);
+      const results = await res.json();
+      if (results.length > 0) tripMap.setView([parseFloat(results[0].lat), parseFloat(results[0].lon)], 12);
+    } catch(e) {}
+    return;
+  }
+
+  geocoded.forEach((place, idx) => {
+    const color = colors[idx % colors.length];
+    L.marker([place.lat, place.lng], { icon: makeIcon(color, idx+1) })
+      .addTo(tripMap)
+      .bindPopup(`<strong>${idx+1}. ${place.name}</strong>`);
+    bounds.push([place.lat, place.lng]);
+  });
+
+  if (geocoded.length > 1) {
+    L.polyline(geocoded.map(p => [p.lat, p.lng]), {
+      color: '#14b8a6', weight: 2.5, opacity: 0.7, dashArray: '8, 8'
+    }).addTo(tripMap);
+  }
+
+  tripMap.fitBounds(bounds, { padding: [40, 40] });
+}
+</script>
+</body>
+</html>
