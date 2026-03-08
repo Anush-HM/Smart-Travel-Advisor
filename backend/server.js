@@ -21,7 +21,10 @@ const chatRoutes = require("./routes/chat");
 app.use("/api/chat", chatRoutes);
 
 const imageRoutes = require("./routes/image"); 
-app.use("/api/image", imageRoutes);    
+app.use("/api/image", imageRoutes);   
+
+const tripRoutes = require("./routes/trip");
+app.use("/api/trip", tripRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
