@@ -305,14 +305,16 @@ function renderPlan(plan) {
       </div>
     </div>`;
 
-  const t = plan.travelToDestination;
-  document.getElementById("travelTo").innerHTML = `
-    <div class="mb-3">
-      <span class="chip">🚀 ${t.mode}</span>
+  const modeIcons = { "Flight":"✈️", "Train":"🚂", "Bus":"🚌", "Car":"🚗" };
+document.getElementById("travelTo").innerHTML = plan.travelOptions.map(t => `
+  <div class="mb-4 pb-4 border-b border-white/10 last:border-0 last:mb-0 last:pb-0">
+    <div class="mb-2">
+      <span class="chip">${modeIcons[t.mode] || '🚀'} ${t.mode}</span>
       <span class="chip">⏱ ${t.duration}</span>
       <span class="chip">💰 ${t.estimatedCost}</span>
     </div>
-    <p class="text-gray-400 text-sm">💡 ${t.tips}</p>`;
+    <p class="text-gray-400 text-sm">💡 ${t.tips}</p>
+  </div>`).join("");
 
   const h = plan.hotel;
   document.getElementById("hotelInfo").innerHTML = `
@@ -353,11 +355,12 @@ function renderPlan(plan) {
     dayContainer.appendChild(el);
   });
 
-  const r = plan.returnTravel;
-  document.getElementById("returnTravel").innerHTML = `
-    <span class="chip">🏠 ${r.mode} Back</span>
+  document.getElementById("returnTravel").innerHTML = plan.returnOptions.map(r => `
+  <div class="mb-3 pb-3 border-b border-white/10 last:border-0 last:mb-0 last:pb-0">
+    <span class="chip">${modeIcons[r.mode] || '🏠'} ${r.mode} Back</span>
     <span class="chip">⏱ ${r.duration}</span>
-    <span class="chip">💰 ${r.estimatedCost}</span>`;
+    <span class="chip">💰 ${r.estimatedCost}</span>
+  </div>`).join("");
 
   const b = plan.budgetBreakdown;
   const items = [

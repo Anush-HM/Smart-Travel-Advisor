@@ -13,12 +13,12 @@ The JSON must follow this exact structure:
 {
   "summary": "Brief 2-sentence trip overview",
   "totalEstimatedCost": "e.g. ₹85,000",
-  "travelToDestination": {
-    "mode": "Flight / Train / Bus",
-    "duration": "e.g. 2.5 hours",
-    "estimatedCost": "e.g. ₹8,000 - ₹15,000",
-    "tips": "One booking tip"
-  },
+  "travelOptions": [
+    { "mode": "Flight", "duration": "e.g. 2.5 hrs", "estimatedCost": "e.g. ₹8,000-₹15,000", "tips": "One booking tip" },
+    { "mode": "Train",  "duration": "e.g. 8 hrs",   "estimatedCost": "e.g. ₹800-₹2,500",    "tips": "One booking tip" },
+    { "mode": "Bus",    "duration": "e.g. 10 hrs",  "estimatedCost": "e.g. ₹500-₹1,200",    "tips": "One booking tip" },
+    { "mode": "Car",    "duration": "e.g. 9 hrs",   "estimatedCost": "e.g. ₹2,000-₹3,500",  "tips": "One booking tip" }
+  ],
   "hotel": {
     "name": "Suggested hotel name fitting the budget",
     "type": "Budget / Mid-range / Luxury",
@@ -36,11 +36,12 @@ The JSON must follow this exact structure:
       "places": ["Place Name 1", "Place Name 2"]
     }
   ],
-  "returnTravel": {
-    "mode": "Flight / Train / Bus",
-    "duration": "e.g. 2.5 hours",
-    "estimatedCost": "e.g. ₹8,000 - ₹15,000"
-  },
+  "returnOptions": [
+    { "mode": "Flight", "duration": "e.g. 2.5 hrs", "estimatedCost": "e.g. ₹8,000-₹15,000" },
+    { "mode": "Train",  "duration": "e.g. 8 hrs",   "estimatedCost": "e.g. ₹800-₹2,500"    },
+    { "mode": "Bus",    "duration": "e.g. 10 hrs",  "estimatedCost": "e.g. ₹500-₹1,200"    },
+    { "mode": "Car",    "duration": "e.g. 9 hrs",   "estimatedCost": "e.g. ₹2,000-₹3,500",  "tips": "One booking tip" }
+  ],
   "budgetBreakdown": {
     "travel": "e.g. ₹20,000",
     "accommodation": "e.g. ₹12,500",
@@ -51,7 +52,7 @@ The JSON must follow this exact structure:
   "allPlaces": ["Complete list of all unique place names mentioned across all days"]
 }
 
-Make it realistic, specific to ${toCity}, and fit within the ${currency}${budget} budget. Generate exactly ${days} day objects in the days array.`;
+Make it realistic, specific to ${toCity}, and fit within the ${currency}${budget} budget. Generate exactly ${days} day objects in the days array. Only include travel modes in travelOptions and returnOptions that are realistically available between ${fromCity} and ${toCity}. Skip modes that are not possible for this route.`;
 
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
