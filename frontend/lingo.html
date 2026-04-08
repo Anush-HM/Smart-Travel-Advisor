@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Local Lingo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+
+<!-- ================= HERO ================= -->
+<section class="py-24 text-center px-6">
+  <h1 id="cityName" class="text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-sky-400">
+    Local Lingo
+  </h1>
+  <p class="mt-4 text-gray-300">Type what you want to say — we'll translate it into the local languages of your destination</p>
+
+  <!-- Input Row -->
+  <div class="mt-10 w-full max-w-2xl mx-auto flex gap-3">
+    <input
+      id="sentenceInput"
+      type="text"
+      placeholder="What do you want to say?"
+      class="flex-1 p-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md focus:outline-none"
+    />
+    <button
+      onclick="translateLingo()"
+      id="translateBtn"
+      class="px-6 rounded-xl bg-gradient-to-r from-teal-500 to-sky-500 font-semibold hover:scale-105 transition cursor-pointer">
+      Translate
+    </button>
+  </div>
+
+  <!-- Quick Phrase Pills -->
+  <div class="mt-5 flex flex-wrap gap-2 justify-center">
+    <span class="text-xs text-gray-400 self-center">Try:</span>
+    <button onclick="fillPhrase('Where is the nearest hospital?')" class="pill">🏥 Nearest hospital?</button>
+    <button onclick="fillPhrase('How much does this cost?')" class="pill">💰 How much?</button>
+    <button onclick="fillPhrase('Thank you so much!')" class="pill">🙏 Thank you!</button>
+    <button onclick="fillPhrase('I need help please')" class="pill">🆘 I need help</button>
+    <button onclick="fillPhrase('Where is the bathroom?')" class="pill">🚻 Bathroom?</button>
+  </div>
+</section>
+
+<!-- ================= LOADER ================= -->
+<div id="loader" class="hidden text-center pb-10">
+  <div class="loader mx-auto mb-3">
+    <span></span><span></span><span></span>
+  </div>
+  <p class="text-gray-400 text-sm">Finding local languages...</p>
+</div>
+
+<!-- ================= ORIGINAL SENTENCE BOX ================= -->
+<div id="originalBox" class="hidden max-w-2xl mx-auto px-6 mb-6">
+  <div class="glass-card text-center">
+    <p class="text-gray-400 text-sm mb-1">You want to say:</p>
+    <p id="originalText" class="text-xl font-semibold"></p>
+    <p id="langCount" class="text-teal-400 text-sm mt-1"></p>
+  </div>
+</div>
+
+<!-- ================= LANGUAGE CARDS ================= -->
+<section class="max-w-7xl mx-auto px-6 pb-24 grid grid-cols-1 md:grid-cols-2 gap-6" id="lingoCards">
+</section>
+
+<!-- ================= BACK LINK ================= -->
+<div class="text-center pb-10">
+  <a id="backLink" href="results.html" class="text-gray-400 hover:text-white text-sm transition">← Back to Results</a>
+</div>
+
+<!-- ================= STYLES ================= -->
+<style>
+  .glass-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 1.75rem;
+    border-radius: 1.5rem;
+    transition: transform 0.3s ease;
+  }
+  .glass-card:hover { transform: translateY(-6px); }
+  .title { font-size: 1.3rem; font-weight: 600; margin-top: 0.5rem; }
+
+  .pill {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 9999px;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pill:hover {
+    background: rgba(20,184,166,0.2);
+    border-color: rgba(20,184,166,0.4);
+    color: white;
+  }
+
+  .lang-badge {
+    background: linear-gradient(135deg, rgba(20,184,166,0.2), rgba(56,189,248,0.2));
+    border: 1px solid rgba(20,184,166,0.3);
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.8rem;
+    color: #5eead4;
+    font-weight: 600;
+  }
+
+  .speak-btn {
+    background: rgba(20,184,166,0.12);
+    border: 1px solid rgba(20,184,166,0.3);
+    border-radius: 0.6rem;
+    color: #5eead4;
+    cursor: pointer;
+    font-size: 0.82rem;
+    padding: 0.4rem 1rem;
+    transition: all 0.2s;
+  }
+  .speak-btn:hover {
+    background: rgba(20,184,166,0.28);
+  }
+  .speak-btn.speaking {
+    animation: pulse 1s infinite;
+  }
+
+  .native-text {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #f0f9ff;
+    line-height: 1.4;
+    margin: 0.5rem 0 0.2rem;
+  }
+  .romanized-text {
+    font-size: 0.95rem;
+    color: #5eead4;
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+  .tip-text {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .loader {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+  }
+  .loader span {
+    width: 8px; height: 8px;
+    background: #14b8a6;
+    border-radius: 50%;
+    animation: bounce 0.8s infinite alternate;
+  }
+  .loader span:nth-child(2) { animation-delay: 0.2s; }
+  .loader span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    from { transform: translateY(0); opacity: 0.6; }
+    to   { transform: translateY(-8px); opacity: 1; }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in {
+    animation: fadeIn 0.4s ease forwards;
+    opacity: 0;
+  }
+</style>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+  // Get destination from URL
+  const params = new URLSearchParams(window.location.search);
+  const destination = params.get('destination') || '';
+
+  // Set city name in hero
+  if (destination) {
+    document.getElementById('cityName').innerText = destination;
+  }
+
+  // Set back link to return to results with same city
+  if (destination) {
+    document.getElementById('backLink').href = `results.html?place=${encodeURIComponent(destination)}`;
+  }
+
+  function fillPhrase(text) {
+    document.getElementById('sentenceInput').value = text;
+    document.getElementById('sentenceInput').focus();
+  }
+
+  async function translateLingo() {
+    const sentence = document.getElementById('sentenceInput').value.trim();
+
+    if (!destination) { alert('No destination found. Please go back and search again.'); return; }
+    if (!sentence)    { alert('Please type something you want to say!'); return; }
+
+    const btn         = document.getElementById('translateBtn');
+    const loader      = document.getElementById('loader');
+    const originalBox = document.getElementById('originalBox');
+    const lingoCards  = document.getElementById('lingoCards');
+
+    btn.disabled    = true;
+    btn.textContent = 'Translating...';
+    loader.classList.remove('hidden');
+    lingoCards.innerHTML = '';
+    originalBox.classList.add('hidden');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/lingo', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ destination, sentence })
+      });
+
+      const data = await response.json();
+      loader.classList.add('hidden');
+
+      if (data.success) {
+        document.getElementById('originalText').innerText = `"${sentence}"`;
+        document.getElementById('langCount').innerText    = `📍 ${destination}  •  ${data.result.languages.length} languages found`;
+        originalBox.classList.remove('hidden');
+        renderCards(data.result.languages);
+      } else {
+        lingoCards.innerHTML = `<p class="text-red-400 text-center col-span-2">Something went wrong. Please try again.</p>`;
+      }
+
+    } catch (err) {
+      loader.classList.add('hidden');
+      lingoCards.innerHTML = `<p class="text-red-400 text-center col-span-2">Could not connect to server. Make sure backend is running.</p>`;
+    }
+
+    btn.disabled    = false;
+    btn.textContent = 'Translate';
+  }
+
+  function renderCards(languages) {
+    const container = document.getElementById('lingoCards');
+
+    languages.forEach((lang, i) => {
+      const card = document.createElement('div');
+      card.className = 'glass-card fade-in';
+      card.style.animationDelay = `${i * 0.1}s`;
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-2">
+          <span class="lang-badge">${lang.language}</span>
+          <button class="speak-btn" id="speakBtn-${i}"
+            onclick="speakText(\`${escapeJs(lang.nativeScript)}\`, '${lang.code}', ${i})">
+            🔊 Listen
+          </button>
+        </div>
+        <p class="native-text">${lang.nativeScript}</p>
+        <p class="romanized-text">/ ${lang.romanized} /</p>
+        <div class="border-t border-white/10 pt-3">
+          <p class="tip-text">💡 ${lang.tip}</p>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function speakText(text, langCode, index) {
+    if (!('speechSynthesis' in window)) {
+      alert('Your browser does not support text-to-speech.');
+      return;
+    }
+    window.speechSynthesis.cancel();
+    document.querySelectorAll('.speak-btn').forEach(b => {
+      b.classList.remove('speaking');
+      b.textContent = '🔊 Listen';
+    });
+
+    const btn       = document.getElementById(`speakBtn-${index}`);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang  = langCode;
+    utterance.rate  = 0.8;
+
+    btn.classList.add('speaking');
+    btn.textContent = '🔊 Speaking...';
+
+    utterance.onend = utterance.onerror = () => {
+      btn.classList.remove('speaking');
+      btn.textContent = '🔊 Listen';
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function escapeJs(str) {
+    return str.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+  }
+
+  // Enter key support
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('sentenceInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); translateLingo(); }
+    });
+  });
+</script>
+
+</body>
+</html>

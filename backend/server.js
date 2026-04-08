@@ -26,6 +26,8 @@ app.use("/api/image", imageRoutes);
 const tripRoutes = require("./routes/trip");
 app.use("/api/trip", tripRoutes);
 
+app.use('/api/lingo', require('./routes/lingo'));
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
