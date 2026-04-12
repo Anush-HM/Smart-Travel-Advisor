@@ -19,6 +19,8 @@ Return ONLY a valid JSON object with NO extra text, NO markdown, NO backticks:
       "code": "hi-IN",
       "nativeScript": "translated text in native script",
       "romanized": "how to pronounce it in english letters",
+      "syllables": "na · mas · te",
+      "stress": "stress on mas",
       "tip": "one short cultural tip about using this phrase here"
     }
   ]

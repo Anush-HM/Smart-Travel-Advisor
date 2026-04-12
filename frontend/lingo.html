@@ -9,6 +9,13 @@
 
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
 
+<!-- ================= FULLSCREEN OVERLAY ================= -->
+<div id="fullscreenOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+  <p id="fullscreenLang" style="color:#5eead4; font-size:1rem; margin-bottom:1rem;"></p>
+  <p id="fullscreenText" style="color:#fff; font-size:3.5rem; font-weight:700; text-align:center; padding:2rem;"></p>
+  <button onclick="closeFullscreen()" style="margin-top:2rem; padding:0.75rem 2rem; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); border-radius:9999px; color:white; font-size:1rem; cursor:pointer;">✕ Close</button>
+</div>
+
 <!-- ================= HERO ================= -->
 <section class="py-24 text-center px-6">
   <h1 id="cityName" class="text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-sky-400">
@@ -80,7 +87,6 @@
     transition: transform 0.3s ease;
   }
   .glass-card:hover { transform: translateY(-6px); }
-  .title { font-size: 1.3rem; font-weight: 600; margin-top: 0.5rem; }
 
   .pill {
     background: rgba(255,255,255,0.08);
@@ -108,7 +114,7 @@
     font-weight: 600;
   }
 
-  .speak-btn {
+  .action-btn {
     background: rgba(20,184,166,0.12);
     border: 1px solid rgba(20,184,166,0.3);
     border-radius: 0.6rem;
@@ -118,11 +124,8 @@
     padding: 0.4rem 1rem;
     transition: all 0.2s;
   }
-  .speak-btn:hover {
+  .action-btn:hover {
     background: rgba(20,184,166,0.28);
-  }
-  .speak-btn.speaking {
-    animation: pulse 1s infinite;
   }
 
   .native-text {
@@ -136,6 +139,17 @@
     font-size: 0.95rem;
     color: #5eead4;
     font-style: italic;
+    margin-bottom: 0.3rem;
+  }
+  .syllable-text {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    margin-bottom: 0.2rem;
+    letter-spacing: 0.05em;
+  }
+  .stress-text {
+    font-size: 0.78rem;
+    color: #64748b;
     margin-bottom: 1rem;
   }
   .tip-text {
@@ -162,10 +176,6 @@
     from { transform: translateY(0); opacity: 0.6; }
     to   { transform: translateY(-8px); opacity: 1; }
   }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.5; }
-  }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -178,17 +188,11 @@
 
 <!-- ================= SCRIPT ================= -->
 <script>
-  // Get destination from URL
   const params = new URLSearchParams(window.location.search);
   const destination = params.get('destination') || '';
 
-  // Set city name in hero
   if (destination) {
     document.getElementById('cityName').innerText = destination;
-  }
-
-  // Set back link to return to results with same city
-  if (destination) {
     document.getElementById('backLink').href = `results.html?place=${encodeURIComponent(destination)}`;
   }
 
@@ -252,13 +256,19 @@
       card.innerHTML = `
         <div class="flex items-center justify-between mb-2">
           <span class="lang-badge">${lang.language}</span>
-          <button class="speak-btn" id="speakBtn-${i}"
-            onclick="speakText(\`${escapeJs(lang.nativeScript)}\`, '${lang.code}', ${i})">
-            🔊 Listen
-          </button>
         </div>
         <p class="native-text">${lang.nativeScript}</p>
         <p class="romanized-text">/ ${lang.romanized} /</p>
+        <p class="syllable-text">🔤 ${lang.syllables}</p>
+        <p class="stress-text">📢 ${lang.stress}</p>
+        <div class="flex gap-2 mt-2 mb-4">
+          <button class="action-btn" onclick="showLocal('${escapeJs(lang.nativeScript)}', '${escapeJs(lang.language)}')">
+            🤳 Show Local
+          </button>
+          <button class="action-btn" id="copyBtn-${i}" onclick="copyText('${escapeJs(lang.nativeScript)}', ${i})">
+            📋 Copy
+          </button>
+        </div>
         <div class="border-t border-white/10 pt-3">
           <p class="tip-text">💡 ${lang.tip}</p>
         </div>
@@ -267,38 +277,28 @@
     });
   }
 
-  function speakText(text, langCode, index) {
-    if (!('speechSynthesis' in window)) {
-      alert('Your browser does not support text-to-speech.');
-      return;
-    }
-    window.speechSynthesis.cancel();
-    document.querySelectorAll('.speak-btn').forEach(b => {
-      b.classList.remove('speaking');
-      b.textContent = '🔊 Listen';
+  function showLocal(text, language) {
+    document.getElementById('fullscreenText').innerText = text;
+    document.getElementById('fullscreenLang').innerText = language;
+    document.getElementById('fullscreenOverlay').style.display = 'flex';
+  }
+
+  function closeFullscreen() {
+    document.getElementById('fullscreenOverlay').style.display = 'none';
+  }
+
+  function copyText(text, index) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById(`copyBtn-${index}`);
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
     });
-
-    const btn       = document.getElementById(`speakBtn-${index}`);
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang  = langCode;
-    utterance.rate  = 0.8;
-
-    btn.classList.add('speaking');
-    btn.textContent = '🔊 Speaking...';
-
-    utterance.onend = utterance.onerror = () => {
-      btn.classList.remove('speaking');
-      btn.textContent = '🔊 Listen';
-    };
-
-    window.speechSynthesis.speak(utterance);
   }
 
   function escapeJs(str) {
-    return str.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+    return str.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$').replace(/'/g, "\\'");
   }
 
-  // Enter key support
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sentenceInput').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') { e.preventDefault(); translateLingo(); }
