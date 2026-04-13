@@ -9,7 +9,6 @@
 * 🗺️ **AI Trip Planner** — generates complete day-by-day itineraries with travel options, hotels, and budget breakdown
 * 🗣️ **Local Lingo** — translates any phrase into local languages with native script, romanized pronunciation, syllable breakdown, and stress guide
 * 🤳 **Show Local** — fullscreen native text display to show locals directly without speaking
-* 📋 **Copy to Clipboard** — instantly copy any translated phrase
 * 🌤️ **Weather Info** — real-time weather data for any destination
 * 🤖 **AI Travel Chatbot** — answers any travel-related question about your destination
 * 💬 **Chat History** — saves conversations with destination context in MongoDB
